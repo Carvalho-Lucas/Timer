@@ -1,63 +1,62 @@
 //EcmaScripts - ES6 Modules
-import resetControls from "./controls.js" 
-import { Timer } from "./timer.js"
+import Controls from "./controls.js" 
+import Timer from "./timer.js"
+import Sounds from "./sounds.js"
+import { buttonPlay, buttonPause, buttonStop, buttonSet, buttonSound_on, buttonSound_off, minutesDisplay, secondsDisplay } from "../elements.js"
 
-//Document Object Model -> Modelagem do objeto em JS = DOM
-const buttonPlay = document.querySelector('.play')
-const buttonPause =  document.querySelector('.pause')
-const buttonStop = document.querySelector('.stop')
-const buttonSet = document.querySelector('.set')
-const buttonSound_on = document.querySelector('.sound-on')
-const buttonSound_off = document.querySelector('.sound-off')
-const minutesDisplay = document.querySelector('.minutes')
-const secondsDisplay = document.querySelector('.seconds')
-let minutes = Number(minutesDisplay.textContent)
-let timerTimeOut
+const controls = Controls({
+  buttonPlay,
+  buttonPause,
+  buttonSet,
+  buttonStop
+})
 
 const timer = Timer({
   minutesDisplay, 
   secondsDisplay, 
-  timerTimeOut, 
-  resetControls,}
-)
+  resetControls: controls.reset,
+})
+
+const sound = Sounds()
 
 buttonPlay.addEventListener('click', function() {
-  buttonPlay.classList.add('hide')
-  buttonPause.classList.remove('hide')
-  buttonSet.classList.add('hide')
-  buttonStop.classList.remove('hide')
-
+  controls.play()
   timer.countDown()
+  sound.pressButton()
 })
 
 buttonPause.addEventListener('click', function(){
-  buttonPause.classList.add('hide')
-  buttonPlay.classList.remove('hide')
-  clearTimeout(timerTimeOut)
-
+  controls.pause()
+  timer.hold()
+  sound.pressButton()
 })
 
 buttonStop.addEventListener('click', function(){
-  resetControls()
-  timer.resetTimer()
-})
-
-buttonSound_off.addEventListener('click', function(){
-  buttonSound_on.classList.remove('hide')
-  buttonSound_off.classList.add('hide')
+  controls.reset()
+  timer.reset()
+  sound.pressButton()
 })
 
 buttonSound_on.addEventListener('click', function(){
   buttonSound_on.classList.add('hide')
   buttonSound_off.classList.remove('hide')
+  sound.bgAudio.play()
 })
 
+buttonSound_off.addEventListener('click', function(){
+  buttonSound_on.classList.remove('hide')
+  buttonSound_off.classList.add('hide')
+  sound.bgAudio.pause()
+})
+
+
 buttonSet.addEventListener('click', function(){
-  let newMinutes = prompt('Qual o tempo ?')
+  let newMinutes = controls.getMinutes()
+  
   if (!newMinutes){
-    timer.resetTimer()
+    timer.reset()
     return
   }
-  minutes = newMinutes
-  updateTimerDisplay(minutes, 0)
+  timer.updateDisplay(newMinutes, 0)
+  timer.updateMinutes(newMinutes)
 })
